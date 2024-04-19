@@ -4,10 +4,21 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    public float moveSpeed = 6;
+    public float moveSpeed = 10;
     public float leftRightSpeed = 4;
 
+    public float increaseSpeedInterval = 5; // Interval to increase moveSpeed
+    public float speedIncreaseAmount = 25; // Amount to increase moveSpeed
+
     static public bool canMove = false; 
+    public bool isJumping = false; 
+    public bool comingDown = false;
+    public GameObject playerObject; 
+
+    void Start()
+    {
+        StartCoroutine(IncreaseMoveSpeedRoutine());
+    }
     void Update()
     {
         transform.Translate(Vector3.forward * Time.deltaTime * moveSpeed, Space.World);
@@ -27,10 +38,50 @@ public class PlayerMove : MonoBehaviour
                 {
                     transform.Translate(Vector3.left * Time.deltaTime * leftRightSpeed * -1);
                 }
-        }
+            }
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.Space)){
+               
+                if(isJumping == false){
+                    isJumping = true; 
+                    playerObject.GetComponent<Animator>().Play("Jump");
+                    StartCoroutine(JumpSequence());
+                }
+            }
         }
 
+        if(isJumping == true){
+            if(comingDown == false){
+                transform.Translate(Vector3.up * Time.deltaTime * 5, Space.World);
+            }
+             if(comingDown == true){
+                transform.Translate(Vector3.up * Time.deltaTime * -5, Space.World);
+            }
+        }
      
+    }
+
+    IEnumerator JumpSequence(){
+    
+        yield return new WaitForSeconds(0.45f);
+        comingDown = true; 
+        yield return new WaitForSeconds(0.45f);
+        isJumping = false;
+        comingDown = false;
+        playerObject.GetComponent<Animator>().Play("Standard Run");
+    }
+
+       IEnumerator IncreaseMoveSpeedRoutine()
+    {
+        // while (true)
+        // {
+            while (moveSpeed <= 25)
+            {
+                yield return new WaitForSeconds(increaseSpeedInterval);
+                moveSpeed += speedIncreaseAmount;
+            }
+            
+
+        // }
     }
 }
 
